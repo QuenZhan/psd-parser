@@ -62,7 +62,7 @@ namespace Ntreev.Library.Psd.Readers.LayerAndMaskInformation
             List<PsdLayer> rootLayers = new List<PsdLayer>();
             Dictionary<PsdLayer, List<PsdLayer>> layerToChilds = new Dictionary<PsdLayer, List<PsdLayer>>();
 
-            foreach (var item in layers.Reverse())
+            foreach (var item in ((IEnumerable<PsdLayer>)layers).Reverse())
             {
                 if (item.SectionType == SectionType.Divider)
                 {

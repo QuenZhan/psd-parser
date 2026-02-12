@@ -1,48 +1,20 @@
-﻿# Ntreev Photoshop Document Parser for .Net
-[![NuGet version (psd-parser)](https://img.shields.io/nuget/v/psd-parser.svg)](https://www.nuget.org/packages/psd-parser/)
+﻿# TRNTH Psd Merger
+This is a fork of Ntreev Photoshop Document Parser for .Net x ImageMagick. Serach the layer(s) in Psd file, merge , then write it to disk.  
 
-## Developer
-
-
-s2quake@ntreev.com
-
-## Summary
-
-포토샵 파일을 분석해 필요한 정보를 사용할 수 있는 .net 용 라이브러리입니다.
-.Net framework 3.5 기반으로 제작되었으며 Unity3D에서도 제약없이 사용이 가능합니다.
-라이브러리는 어도비에서 제공하는 포토샵 파일 포맷 정보 기반으로 제작되었습니다.
-http://www.adobe.com/devnet-apps/photoshop/fileformatashtml/
-Image Resource IDs와 Additional Layer Information 부분은 종류가 워낙 많아서 
-필요한 부분을 제외하고는 파싱 작업을 하지않았습니다.
-
-라이브러리에서 제공하는 PsdViewer는 정보만 볼 수 있는 간단한 프로그램입니다. 
-레이어의 그림내용을 보여주지는 않습니다.
-
-작업의 목표는 쉬운 사용법, 모든 정보 추출, 빠른 속도입니다.
-
-## Development Environment
-
-  - Microsoft Visual Studio Professional 2017
-  - C# 7.0
-  - .NET Framework 4.5
-
-    old version has moved to branch 1.0
-
-## Test Environment
-
-Photoshop CC
 
 ## Usage
 
-SourceCode:
+Minimal Usage:
 
-    using (PsdDocument document = PsdDocument.Create(filename))
-	{
-		foreach (var item in document.Childs)
-		{
-			Console.WriteLine("LayerName : " + item.Name);
-		}
-	}
+    using var psd = new PsdController("./example.psd");
+    using var mergedImage=psd.Merge("toMerge");
+    mergedImage?.Write("./output.png",MagickFormat.Png);
+
+
+## Target Framework
+
+- .NET Framework 6.0 (good for monogame)
+
 
 ## License
 

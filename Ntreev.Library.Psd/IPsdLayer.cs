@@ -34,7 +34,7 @@ namespace Ntreev.Library.Psd
 
         string Name { get; }
 
-        IPsdLayer Parent { get; }
+        IPsdLayer? Parent { get; }
 
         IProperties Resources { get; }
 
