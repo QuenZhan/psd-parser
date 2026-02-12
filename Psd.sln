@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ntreev.Library.Psd", "Ntree
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{D50E5BDF-F79D-48A5-BB7D-B484A4050F69}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TRNTHPsd", "TRNTHPsd\TRNTHPsd.csproj", "{2160092A-555D-414C-9A06-0FE8F379A628}"
-EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Ntreev.Library.Psd.AssemblyInfo\Ntreev.Library.Psd.AssemblyInfo.projitems*{2a3bad6e-ceb1-432b-87e2-0581e36067e7}*SharedItemsImports = 4
@@ -33,12 +31,6 @@ Global
 		{D50E5BDF-F79D-48A5-BB7D-B484A4050F69}.Release_Unity|Any CPU.Build.0 = Debug|Any CPU
 		{D50E5BDF-F79D-48A5-BB7D-B484A4050F69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D50E5BDF-F79D-48A5-BB7D-B484A4050F69}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2160092A-555D-414C-9A06-0FE8F379A628}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2160092A-555D-414C-9A06-0FE8F379A628}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2160092A-555D-414C-9A06-0FE8F379A628}.Release_Unity|Any CPU.ActiveCfg = Debug|Any CPU
-		{2160092A-555D-414C-9A06-0FE8F379A628}.Release_Unity|Any CPU.Build.0 = Debug|Any CPU
-		{2160092A-555D-414C-9A06-0FE8F379A628}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2160092A-555D-414C-9A06-0FE8F379A628}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

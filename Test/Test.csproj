@@ -24,7 +24,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Ntreev.Library.Psd\Ntreev.Library.Psd.csproj" />
-      <ProjectReference Include="..\TRNTHPsd\TRNTHPsd.csproj" />
     </ItemGroup>
 
 </Project>
