@@ -30,9 +30,9 @@ public class PsdController:IDisposable
         _magickImageCollection.Dispose();
     }
 
-    public IMagickImage<ushort>? Merge(IEnumerable<IPsdLayer> visibleDescendants, IPsdLayer? first=null)
+    public IMagickImage<ushort>? Merge(IEnumerable<IPsdLayer> layers)
     {
-        return MergeLayers(Dictionary, visibleDescendants, first, MidProductFolder);
+        return MergeLayers(Dictionary, layers.SelectMany(t=>t.VisibleDescendants()), MidProductFolder);
     }
 
     public string? MidProductFolder { get; set; }
@@ -69,31 +69,28 @@ public class PsdController:IDisposable
         yield return list.ToArray().Reverse();
     }
 
-    private static IMagickImage<ushort>? MergeLayers(IReadOnlyDictionary<IPsdLayer, IMagickImage<ushort>> allImages, IEnumerable<IPsdLayer> psdLayers, IPsdLayer? toCrop, string? midProductFolder)
+    private static IMagickImage<ushort>? MergeLayers(IReadOnlyDictionary<IPsdLayer, IMagickImage<ushort>> allImages, IEnumerable<IPsdLayer> psdLayers, string? midProductFolder)
     {
-        var enumerable = psdLayers as IPsdLayer[] ?? psdLayers.ToArray();
-        if (enumerable.Length <= 0)
+        var layersToMerge = psdLayers as IPsdLayer[] ?? psdLayers.ToArray();
+        if (layersToMerge.Length <= 0)
         {
             return null;
         }
-
-        // System.Console.SetOut(new );
-        var document = enumerable[0].Document;
-        var localImages = allImages.ToDictionary(t => t.Key, t => t.Value);
-        var hashCode = enumerable.GetHashCode();
+        var document = layersToMerge[0].Document;
+        var imagesClone = allImages.ToDictionary(t => t.Key, t => t.Value);
+        var hashCode = layersToMerge.GetHashCode();
         var composingIndex = 0;
-        var groups = enumerable.GroupBy(t => t.Parent ?? document)
-                .Where(t => enumerable.Contains(t.Key))
-                .OrderByDescending(t => t.Key.Ancestors().Count())
-            ;
-        foreach (var folder in groups)
+        var folders = layersToMerge.GroupBy(t => t.Parent ?? document)
+                .Where(t => layersToMerge.Contains(t.Key))
+                .OrderByDescending(t => t.Key.Ancestors().Count());
+        foreach (var folder in folders)
         {
             Console.WriteLine($"Merge Folder :{folder.Key.Name}");
             var canvas1 = document.CreateEmptyCanvas();
             var reverse = GroupByClipping(folder.ToArray()).Reverse().ToArray();
             foreach (var layer in reverse.First())
             {
-                if (localImages.TryGetValue(layer, out var image1)) Composite(image1, layer, canvas1, composingIndex++, midProductFolder, hashCode);
+                if (imagesClone.TryGetValue(layer, out var image1)) Composite(image1, layer, canvas1, composingIndex++, midProductFolder, hashCode);
             }
 
             foreach (var clippingGroup in reverse.Skip(1))
@@ -102,30 +99,25 @@ public class PsdController:IDisposable
                 using var empty = document.CreateEmptyCanvas();
                 foreach (var layer in layers1)
                 {
-                    if (localImages.TryGetValue(layer, out var image2)) Composite(image2, layer, canvas1, composingIndex++, midProductFolder, hashCode);
+                    if (imagesClone.TryGetValue(layer, out var image2)) Composite(image2, layer, canvas1, composingIndex++, midProductFolder, hashCode);
                 }
 
                 Composite(empty, layers1[0], canvas1, composingIndex++, midProductFolder, hashCode);
             }
 
-            localImages[folder.Key] = canvas1;
+            imagesClone[folder.Key] = canvas1;
         }
 
         var canvas = document.CreateEmptyCanvas();
-        foreach (var e in enumerable.GroupBy(t => t.Ancestors().Count()).OrderBy(t => t.Key).First().ToArray())
+        foreach (var e in layersToMerge.GroupBy(t => t.Ancestors().Count()).OrderBy(t => t.Key).First().ToArray())
         {
-            if (localImages.TryGetValue(e, out var image)) Composite(image, e, canvas, composingIndex++, midProductFolder, hashCode);
+            if (imagesClone.TryGetValue(e, out var image)) Composite(image, e, canvas, composingIndex++, midProductFolder, hashCode);
         }
 
-        foreach (var e in localImages.Values.Except(allImages.Values.Append(canvas)))
+        foreach (var e in imagesClone.Values.Except(allImages.Values.Append(canvas)))
         {
             e.Dispose();
         }
-
-        if (toCrop is null) return canvas;
-        canvas.Crop(new MagickGeometry(toCrop.Left, toCrop.Top, (uint)toCrop.Width, (uint)toCrop.Height));
-        canvas.ResetPage();
-
         return canvas;
     }
 

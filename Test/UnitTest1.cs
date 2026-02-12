@@ -41,10 +41,13 @@ public class Tests
             }
             Assert.That(File.Exists(fileName), Is.True);
             Assert.That(Directory.GetFiles(midProductFolder), Has.Length.GreaterThan(3));
-
-            var psdLayer = psd.Document.VisibleDescendants().First(t=>t.Name=="toCrop");
-            using var cropped=psd.Merge(psdFolderLayer.VisibleDescendants(),psdLayer);
-            Assert.That(cropped?.Width,Is.EqualTo(psdLayer.Width));
+            
+            Directory.Delete(midProductFolder, true);
+            psd.MidProductFolder=midProductFolder;
+            using var toMerge=psd.Merge("toMerge");
+            const string outputshortPng = "./outputShort.png";
+            if (toMerge != null) await toMerge.WriteAsync(outputshortPng, MagickFormat.Png);
+            Assert.That(File.Exists(outputshortPng), Is.True);
         });
         return Task.CompletedTask;
     }
@@ -53,7 +56,7 @@ public class Tests
     public void BasicUsage()
     {
         using var psd = new PsdController("./example.psd");
-        using var mergedImage=psd.Merge("toMerge");
+        using var mergedImage=psd.Merge("toMerge"); 
         mergedImage?.Write("./output.png",MagickFormat.Png);
         
         Assert.That(File.Exists("./output.png"),Is.True);
