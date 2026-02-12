@@ -22,7 +22,7 @@ using System.Text;
 
 namespace Ntreev.Library.Psd
 {
-    public static class Extensions
+    public static partial class Extensions
     {
         public static byte[] MergeChannels(this IImageSource imageSource)
         {
