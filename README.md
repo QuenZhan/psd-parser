@@ -7,7 +7,7 @@ This is a fork of Ntreev Photoshop Document Parser for .Net x ImageMagick. Serac
 Minimal Usage:
 
     using var psd = new PsdController("./example.psd");
-    using var mergedImage=psd.Merge("toMerge");
+    using var mergedImage=psd.Merge("toMerge"); // input the layer name
     mergedImage?.Write("./output.png",MagickFormat.Png);
 
 
