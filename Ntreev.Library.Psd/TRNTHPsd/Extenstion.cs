@@ -10,7 +10,7 @@ public static class Extenstion
 {
     public static Dictionary<IPsdLayer, IMagickImage<ushort>> CreateLayerToImageDictionary(this PsdDocument document, MagickImageCollection imageCollection)
     {
-        return document.Descendants().Where(t=>t.HasImage && t is PsdLayer).ToArray().Select((t, i)=>new {Layer=t,Image=imageCollection[i+1]}).ToDictionary(t=>t.Layer,t=>t.Image);
+        return document.Descendants().Where(t=>t.HasImage && t is PsdLayer).Distinct().Select((t, i)=>new {Layer=t,Image=imageCollection[i+1]}).ToDictionary(t=>t.Layer,t=>t.Image);
     }
 
     public static IEnumerable<IPsdLayer> Ancestors(this IPsdLayer psdLayer)

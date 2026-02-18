@@ -45,11 +45,12 @@ namespace Ntreev.Library.Psd
 
         public static IEnumerable<IPsdLayer> Descendants(this IPsdLayer layer)
         {
-            return Descendants(layer, item => true);
+            return layer.Descendants(_ => true);
         }
 
         public static IEnumerable<IPsdLayer> Descendants(this IPsdLayer layer, Func<IPsdLayer, bool> filter)
         {
+            yield return layer;
             foreach (var item in layer.Childs)
             {
                 if (filter(item) == false)

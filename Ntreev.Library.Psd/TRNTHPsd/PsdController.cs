@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using ImageMagick;
 using Ntreev.Library.Psd;
@@ -20,7 +21,7 @@ public class PsdController:IDisposable
         Dictionary= Document.CreateLayerToImageDictionary(_magickImageCollection);
     }
 
-    private IReadOnlyDictionary<IPsdLayer, IMagickImage<ushort>> Dictionary { get;  }
+    public IReadOnlyDictionary<IPsdLayer, IMagickImage<ushort>> Dictionary { get;  }
     public PsdDocument Document { get; }
 
     public void Dispose()
@@ -69,7 +70,7 @@ public class PsdController:IDisposable
         yield return list.ToArray().Reverse();
     }
 
-    private static IMagickImage<ushort>? MergeLayers(IReadOnlyDictionary<IPsdLayer, IMagickImage<ushort>> allImages, IEnumerable<IPsdLayer> psdLayers, string? midProductFolder)
+    public static IMagickImage<ushort>? MergeLayers(IReadOnlyDictionary<IPsdLayer, IMagickImage<ushort>> allImages, IEnumerable<IPsdLayer> psdLayers, string? midProductFolder)
     {
         var layersToMerge = psdLayers as IPsdLayer[] ?? psdLayers.ToArray();
         if (layersToMerge.Length <= 0)
@@ -124,5 +125,21 @@ public class PsdController:IDisposable
     public IMagickImage<ushort>? Merge(string layerName)
     {
         return Merge(Document.VisibleDescendants().Where(t => t.Name == layerName));
+    }
+
+    public static IMagickImage<ushort>? MergeLayers(IReadOnlyDictionary<IPsdLayer, IMagickImage<ushort>> allImages,
+        IEnumerable<IPsdLayer> psdLayers, IPsdLayer? toCrop = null)
+    {
+        // var keepMidProduct = _texturePackerController.KeepMidProduct;
+
+        const string usersJimboDownloadsTest = "/Users/jimbo/Downloads/test";
+        var keepMidProduct = Directory.Exists(usersJimboDownloadsTest);
+        var canvas = PsdController.MergeLayers(allImages, psdLayers, keepMidProduct?usersJimboDownloadsTest:null);
+        if (toCrop is null) return canvas;
+        if (canvas == null) return null;
+        canvas.Crop(new MagickGeometry(toCrop.Left, toCrop.Top, (uint)toCrop.Width, (uint)toCrop.Height));
+        canvas.ResetPage();
+        return canvas;
+
     }
 }
