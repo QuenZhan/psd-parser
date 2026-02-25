@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using ImageMagick;
+using JetBrains.Annotations;
 using Ntreev.Library.Psd;
 using Console = System.Console;
 using GC = System.GC;
@@ -48,11 +49,11 @@ public class PsdController:IDisposable
         else canvas.Composite(image,  compositeOperator);
         Console.WriteLine($"[Composite\t]\t{layer.Name} {compositeOperator}");
         if (string.IsNullOrEmpty(midProductFolder)) return;
-        image.WriteAsync($"{midProductFolder}/{hashCode}_{composingIndex}_image.png", MagickFormat.Png);
-        canvas.WriteAsync($"{midProductFolder}/{hashCode}_{composingIndex}_{layer.Name}_{layer.Opacity*100:000}_{compositeOperator}.png", MagickFormat.Png);
+        canvas.WriteAsync($"{midProductFolder}/{hashCode}_{composingIndex}__composition.png", MagickFormat.Png);
+        image.WriteAsync($"{midProductFolder}/{hashCode}_{composingIndex}_{layer.Name}_{layer.Opacity*100:000}_{compositeOperator}.png", MagickFormat.Png);
     }
 
-    private static IEnumerable<IEnumerable<IPsdLayer>> GroupByClipping(IPsdLayer[] array)
+    public static IEnumerable<IEnumerable<IPsdLayer>> GroupByClipping(IPsdLayer[] array)
     {
         var list = new List<IPsdLayer>(){array[^1]};
         for (var index = array.Length - 2; index >= 0; index--)
@@ -63,13 +64,14 @@ public class PsdController:IDisposable
                 if(!current.IsClipping)list.Add(current);
                 yield return list.ToArray().Reverse(); 
                 list.Clear();
+                continue;
             }
             list.Add(current);
         }
 
-        yield return list.ToArray().Reverse();
+        if(list.Count>0) yield return list.ToArray().Reverse();
     }
-
+    [PublicAPI]
     public static IMagickImage<ushort>? MergeLayers(IReadOnlyDictionary<IPsdLayer, IMagickImage<ushort>> allImages, IEnumerable<IPsdLayer> psdLayers, string? midProductFolder)
     {
         var layersToMerge = psdLayers as IPsdLayer[] ?? psdLayers.ToArray();
@@ -88,13 +90,13 @@ public class PsdController:IDisposable
         {
             Console.WriteLine($"Merge Folder :{folder.Key.Name}");
             var canvas1 = document.CreateEmptyCanvas();
-            var reverse = GroupByClipping(folder.ToArray()).Reverse().ToArray();
-            foreach (var layer in reverse.First())
+            var groupByClipping = GroupByClipping(folder.ToArray()).Reverse().ToArray();
+            foreach (var layer in groupByClipping.First())
             {
                 if (imagesClone.TryGetValue(layer, out var image1)) Composite(image1, layer, canvas1, composingIndex++, midProductFolder, hashCode);
             }
 
-            foreach (var clippingGroup in reverse.Skip(1))
+            foreach (var clippingGroup in groupByClipping.Skip(1))
             {
                 var layers1 = clippingGroup.ToArray();
                 using var empty = document.CreateEmptyCanvas();
@@ -124,7 +126,8 @@ public class PsdController:IDisposable
 
     public IMagickImage<ushort>? Merge(string layerName)
     {
-        return Merge(Document.VisibleDescendants().Where(t => t.Name == layerName));
+        var psdLayers = Document.VisibleDescendants().Where(t => t.Name == layerName);
+        return Merge(psdLayers);
     }
 
     public static IMagickImage<ushort>? MergeLayers(IReadOnlyDictionary<IPsdLayer, IMagickImage<ushort>> allImages,
