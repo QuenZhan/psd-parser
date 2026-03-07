@@ -93,4 +93,17 @@ public class Tests
             Assert.That(groupByClipping[1].First().Name, Is.EqualTo("圖層 8"));
         });
     }
+
+    [Test]
+    public void TestMerge()
+    {
+        Directory.Delete("./midProduct",true);
+        Directory.CreateDirectory("./midProduct");
+        using var psd=new PsdController("/Users/jimbo/gitRepos/DungeonMunchies2DevContent/GUI/CookingUI.psd"){MidProductFolder = "./midProduct"};
+        var clipping=PsdController.GroupByClipping(psd.Document.Childs.First(t=>t.Name=="[merge]CookBG").Childs).ToArray();
+        Assert.That(clipping, Has.Length.EqualTo(3));
+        // using var merged=psd.Merge("[merge]CookBG");
+        // merged?.Write("./output.png",MagickFormat.Png);
+        // Assert.That(File.Exists("./output.png"),Is.True);
+    }
 }

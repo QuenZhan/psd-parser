@@ -64,7 +64,7 @@ public class PsdController:IDisposable
                 if(!current.IsClipping)list.Add(current);
                 yield return list.ToArray().Reverse(); 
                 list.Clear();
-                continue;
+                if (!current.IsClipping) continue;
             }
             list.Add(current);
         }

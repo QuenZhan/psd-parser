@@ -9,3 +9,4 @@ packages/
 *.bat
 .idea
 Psd.sln.DotSettings.user
+.DS_Store
