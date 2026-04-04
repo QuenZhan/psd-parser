@@ -106,4 +106,33 @@ public class Tests
         // merged?.Write("./output.png",MagickFormat.Png);
         // Assert.That(File.Exists("./output.png"),Is.True);
     }
+
+    [Test]
+    public void SettingUiBgMerge()
+    {
+        var devContent = Environment.GetEnvironmentVariable("DM2_DEV_CONTENT")
+            ?? Path.GetFullPath("../../../../external/DungeonMunchies2DevContent");
+        var psdPath = $"{devContent}/GUI/SettingUI.psd";
+
+        if (!File.Exists(psdPath))
+        {
+            Assert.Ignore($"PSD not found: {psdPath} — set DM2_DEV_CONTENT");
+            return;
+        }
+
+        const string midProductFolder = "./midProduct_SettingUI";
+        Directory.CreateDirectory(midProductFolder);
+
+        using var psd = new PsdController(psdPath) { MidProductFolder = midProductFolder };
+        var settingUiAll = psd.Document.Childs.Single(t => t.Name == "SettingUIAll");
+        var mergeLayer = settingUiAll.Childs.Single(t => t.Name == "[merge]SettingBG");
+
+        using var merged = psd.Merge(mergeLayer.VisibleDescendants());
+        Assert.That(merged, Is.Not.Null);
+
+        const string outputPath = "./settingUIBackground.png";
+        merged!.Write(outputPath, MagickFormat.Png);
+        Assert.That(File.Exists(outputPath), Is.True);
+        Console.WriteLine($"Output written: {Path.GetFullPath(outputPath)}");
+    }
 }

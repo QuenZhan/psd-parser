@@ -39,9 +39,10 @@ public class PsdController:IDisposable
 
     public string? MidProductFolder { get; set; }
 
-    private static void Composite(IMagickImage<ushort> image, IPsdLayer layer,
+    private static void Composite(IMagickImage<ushort> imageSrc, IPsdLayer layer,
         IMagickImage<ushort> canvas, int composingIndex, string? midProductFolder, int hashCode=0)
     {
+        using var image = imageSrc.Clone();
         image.Evaluate(Channels.RGB
             , EvaluateOperator.Multiply, layer.Opacity); // pre multiply alpha
         var compositeOperator = layer.IsClipping ? CompositeOperator.Atop : layer.BlendMode==BlendMode.ColorDodge?CompositeOperator.ColorDodge: CompositeOperator.Over;
@@ -99,13 +100,15 @@ public class PsdController:IDisposable
             foreach (var clippingGroup in groupByClipping.Skip(1))
             {
                 var layers1 = clippingGroup.ToArray();
-                using var empty = document.CreateEmptyCanvas();
+                using var groupCanvas = document.CreateEmptyCanvas();
                 foreach (var layer in layers1)
                 {
-                    if (imagesClone.TryGetValue(layer, out var image2)) Composite(image2, layer, canvas1, composingIndex++, midProductFolder, hashCode);
+                    if (imagesClone.TryGetValue(layer, out var image2)) Composite(image2, layer, groupCanvas, composingIndex++, midProductFolder, hashCode);
                 }
 
-                Composite(empty, layers1[0], canvas1, composingIndex++, midProductFolder, hashCode);
+                // Composite(groupCanvas, layers1[0], canvas1, composingIndex++, midProductFolder, hashCode);
+                canvas1.Composite(groupCanvas, CompositeOperator.Over);
+
             }
 
             imagesClone[folder.Key] = canvas1;
