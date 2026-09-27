@@ -85,7 +85,7 @@ namespace Ntreev.Library.Psd
             int width = this.Right - Left;
             int height = this.Bottom - this.Top;
 
-            if ((width > 0x3000) || (height > 0x3000))
+            if ((width > 0x8000) || (height > 0x8000))
             {
                 throw new NotSupportedException(string.Format("Invalidated size ({0}, {1})", width, height));
             }
